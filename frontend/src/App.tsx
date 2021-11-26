@@ -152,7 +152,7 @@ function App() {
               </Box>
             )
           }
-          <Box maxWidth="600px">
+          <Box maxWidth="600px" pt={8}>
             It would take a human <strong>{humanCountTime(goal || 0)}</strong> to count that high!
           </Box>
         </VStack>
