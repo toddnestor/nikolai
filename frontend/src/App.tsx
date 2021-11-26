@@ -26,7 +26,7 @@ type CountResult = {
   duration: string;
 }
 
-const MAX = 100_000_000_000;
+const MAX = 95_000_000_000;
 
 function App() {
   const [goal, setGoal] = React.useState(1_000_000_000);
