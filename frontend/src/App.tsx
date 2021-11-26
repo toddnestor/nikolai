@@ -17,7 +17,7 @@ import {
   SliderTrack,
   SliderThumb,
   Slider,
-  SliderFilledTrack,
+  SliderFilledTrack, AlertIcon, Alert,
 } from "@chakra-ui/react";
 import './App.css';
 
@@ -26,7 +26,7 @@ type CountResult = {
   duration: string;
 }
 
-const MAX = 50_000_000_000;
+const MAX = 70_000_000_000;
 
 const SECOND = 1;
 const MINUTE = 60 * SECOND;
@@ -36,7 +36,7 @@ const WEEK = DAY * 7;
 const MONTH = 30 * DAY;
 const YEAR = DAY * 365;
 
-const pluralize = (count: number, word: string) => `${word}${Math.round(count) === 1 ? '' : 's'}`;
+const pluralize = (count: number, word: string) => `${word}${Math.floor(count) === 1 ? '' : 's'}`;
 
 type TimePeriod = 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
 
@@ -53,7 +53,7 @@ const INTERVALS: {[key: string]: number} = {
 const intervals = (difference: number, word: TimePeriod): [string, number] => {
   const numIntervals = difference / INTERVALS[word];
   const remainder = difference % INTERVALS[word];
-  return [`${Math.round(numIntervals).toLocaleString()} ${pluralize(numIntervals, word)}`, remainder];
+  return [`${Math.floor(numIntervals).toLocaleString()} ${pluralize(numIntervals, word)}`, remainder];
 };
 
 const humanCountTime = (duration: number): string => {
@@ -86,18 +86,28 @@ function App() {
   const [goal, setGoal] = React.useState(1_000_000_000);
   const [loading, setLoading] = React.useState(false);
   const [results, setResults] = React.useState<CountResult | null>(null);
+  const [error, setError] = React.useState(false);
 
   const loadIt = async () => {
     setLoading(true);
-    const response = await fetch('https://api.nestopia.life/v1/count',{
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({goal})
-    });
+    setError(false);
+    try {
+      const response = await fetch('https://api.nestopia.life/v1/count', {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({goal})
+      });
+      if (response.ok) {
+        setResults(await response.json());
+      } else {
+        setError(true);
+      }
+    } catch(e) {
+      setError(true);
+    }
 
-    setResults(await response.json());
     setLoading(false);
   };
 
@@ -115,6 +125,16 @@ function App() {
               </NumberInputStepper>
             </NumberInput>
           </Box>
+          {
+            error && (
+              <Box>
+                <Alert status="error" variant="solid">
+                  <AlertIcon />
+                  There was an error processing your request, please try a lower number
+                </Alert>
+              </Box>
+            )
+          }
           <Box width="100%">
             <Slider min={0} max={MAX} focusThumbOnChange={false} value={goal} onChange={value => setGoal(value)}>
               <SliderTrack>
