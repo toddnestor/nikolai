@@ -71,7 +71,7 @@ function App() {
             <Button variant="outline" onClick={loadIt}>Count!</Button>
           </Box>
           <Box width="100%">
-            {loading && <Spinner size="xl"/>}
+            {loading && <Spinner mt={4} size="xl"/>}
           </Box>
           {
             !loading && results && (
