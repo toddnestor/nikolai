@@ -22,11 +22,13 @@ import {
 import './App.css';
 
 type CountResult = {
+  Id: string;
   goal: number;
   duration: string;
+  completed: boolean;
 }
 
-const MAX = 70_000_000_000;
+const MAX = 2_000_000_000_000;
 
 const SECOND = 1;
 const MINUTE = 60 * SECOND;
@@ -39,6 +41,16 @@ const YEAR = DAY * 365;
 const pluralize = (count: number, word: string) => `${word}${Math.floor(count) === 1 ? '' : 's'}`;
 
 type TimePeriod = 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
+
+const TIME_PER_BILLION = 327;
+
+const estimatedTimeRemaining = (goal: number, start: number) => {
+  const elapsed = Date.now() - start;
+  const billions = goal / 1_000_000_000;
+  const estimate = billions * TIME_PER_BILLION;
+
+  return Math.floor((estimate - elapsed) / 1000);
+}
 
 const INTERVALS: {[key: string]: number} = {
   second: SECOND,
@@ -83,6 +95,7 @@ const humanCountTime = (duration: number): string => {
 }
 
 function App() {
+  const [start, setStart] = React.useState<number | null>(null);
   const [goal, setGoal] = React.useState(1_000_000_000);
   const [loading, setLoading] = React.useState(false);
   const [results, setResults] = React.useState<CountResult | null>(null);
@@ -92,7 +105,7 @@ function App() {
     setLoading(true);
     setError(false);
     try {
-      const response = await fetch('https://api.nestopia.life/v1/count', {
+      const response = await fetch('https://api.nestopia.life/v1/start-count', {
         method: 'post',
         headers: {
           'Content-Type': 'application/json',
@@ -100,6 +113,7 @@ function App() {
         body: JSON.stringify({goal})
       });
       if (response.ok) {
+        setStart(Date.now());
         setResults(await response.json());
       } else {
         setError(true);
@@ -107,9 +121,43 @@ function App() {
     } catch(e) {
       setError(true);
     }
-
-    setLoading(false);
   };
+
+  React.useEffect(() => {
+    if (!results) {
+      return;
+    }
+
+    let interval: NodeJS.Timeout | undefined;
+
+    const poller = async () => {
+      const response = await fetch(`https://api.nestopia.life/v1/get-count/${results.Id}`);
+
+      if (response.ok) {
+        const json: CountResult = await response.json();
+
+        setResults(json);
+
+        if (json.completed && interval) {
+          clearInterval(interval);
+        }
+      } else {
+        setError(true);
+      }
+    };
+
+    interval = setInterval(() => poller(), 1000);
+  }, [(results || {}).Id]);
+
+  React.useEffect(() => {
+    if (!results) {
+      return;
+    }
+
+    if (results.completed) {
+      setLoading(false);
+    }
+  }, [(results || {}).completed]);
 
   return (
     <div className="App">
@@ -131,6 +179,16 @@ function App() {
                 <Alert status="error" variant="solid">
                   <AlertIcon />
                   There was an error processing your request, please try a lower number
+                </Alert>
+              </Box>
+            )
+          }
+          {
+            (!results || !results.completed) && start && (
+              <Box>
+                <Alert status="info" variant="solid">
+                  <AlertIcon />
+                  There is an estimated {estimatedTimeRemaining(goal, start)} seconds remaining.
                 </Alert>
               </Box>
             )

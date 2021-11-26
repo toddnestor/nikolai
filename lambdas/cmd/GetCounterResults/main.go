@@ -1,26 +1,20 @@
 package main
 
 import (
-	"encoding/json"
-	"errors"
+	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/google/uuid"
 	"net/http"
 	"nikolai/pkg/counter"
 	"nikolai/pkg/utils"
 )
 
 func handler(req events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
-	var record counter.Record
-	if err := json.Unmarshal([]byte(req.Body), &record); err != nil {
-		return nil, errors.New("something went wrong")
-	}
+	id := req.PathParameters["id"]
+	fmt.Printf("Getting results for %s", id)
 
-	record.Id = uuid.NewString()
-	record.Completed = false
-
-	record.Save()
+	record := counter.Record{Id: id}
+	record.FetchValues()
 
 	return utils.ApiResponse(http.StatusOK, record)
 }

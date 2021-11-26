@@ -1,24 +1,13 @@
 package main
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"net/http"
+	"nikolai/pkg/counter"
 	"regexp"
 	"time"
 )
-
-type Counter struct {
-	Goal int `json:"goal"`
-}
-
-type CountResponse struct {
-	*Counter
-	Duration string `json:"duration"`
-}
 
 func countIt(goal int) string {
 	count := 0
@@ -49,28 +38,18 @@ func countIt(goal int) string {
 	return str
 }
 
-func apiResponse(status int, body interface{}) (*events.APIGatewayProxyResponse, error) {
-	resp := events.APIGatewayProxyResponse{Headers: map[string]string{"Content-Type": "application/json"}}
-	resp.StatusCode = status
+func handler(req events.DynamoDBEvent) {
+	for _, item := range req.Records {
+		record := new(counter.Record)
+		changes := item.Change.NewImage
 
-	stringBody, _ := json.Marshal(body)
-	resp.Body = string(stringBody)
-	return &resp, nil
-}
-
-func handler(req events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
-  var counter Counter
-	if err := json.Unmarshal([]byte(req.Body), &counter); err != nil {
-		return nil, errors.New("Something went wrong")
+		record.Id = changes["Id"].String()
+		goal, _ := changes["goal"].Integer()
+		record.Goal = int(goal)
+		record.Duration = countIt(record.Goal)
+		record.Completed = true
+		record.Save()
 	}
-
-	duration := countIt(counter.Goal)
-	response := CountResponse{
-		Counter:  &counter,
-		Duration: duration,
-	}
-
-	return apiResponse(http.StatusOK, response)
 }
 
 func main() {
