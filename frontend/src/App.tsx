@@ -1,8 +1,6 @@
 import React from 'react';
 import {
-  Input,
   NumberInput,
-  InputGroup,
   Button,
   NumberInputStepper,
   NumberDecrementStepper,
@@ -13,7 +11,6 @@ import {
   Stat,
   StatLabel,
   StatHelpText,
-  StatArrow,
   StatNumber,
   StatGroup,
   SliderTrack, SliderThumb, Slider, Flex, SliderFilledTrack
