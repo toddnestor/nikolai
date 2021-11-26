@@ -159,6 +159,7 @@ function App() {
             <br/>
             to count that high!
           </Box>
+          <Box pt={4}><sup>*</sup> assuming on average they count one number per second</Box>
         </VStack>
       </Box>
     </div>
