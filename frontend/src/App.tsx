@@ -13,7 +13,10 @@ import {
   StatHelpText,
   StatNumber,
   StatGroup,
-  SliderTrack, SliderThumb, Slider, Flex, SliderFilledTrack
+  SliderTrack,
+  SliderThumb,
+  Slider,
+  SliderFilledTrack,
 } from "@chakra-ui/react";
 import './App.css';
 
