@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"net/http"
+	"regexp"
 	"time"
 )
 
@@ -38,6 +39,10 @@ func countIt(goal int) string {
 		"It took us: %s\n",
 		duration,
 	)
+
+	regex := regexp.MustCompile(`\.\d+`)
+
+	str = regex.ReplaceAllString(str, "")
 
 	fmt.Println(str)
 

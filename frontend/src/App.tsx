@@ -26,6 +26,8 @@ type CountResult = {
   duration: string;
 }
 
+const MAX = 100_000_000_000;
+
 function App() {
   const [goal, setGoal] = React.useState(1_000_000_000);
   const [loading, setLoading] = React.useState(false);
@@ -51,7 +53,7 @@ function App() {
         <VStack minWidth="450px">
           <h1>Nikolai's Counter</h1>
           <Box width="100%">
-            <NumberInput colorScheme="white" type="number" value={goal} onChange={(value) => setGoal(parseInt(value))}>
+            <NumberInput max={MAX} colorScheme="white" type="number" value={goal} onChange={(value) => setGoal(parseInt(value))}>
               <NumberInputField />
               <NumberInputStepper>
                 <NumberIncrementStepper />
@@ -60,7 +62,7 @@ function App() {
             </NumberInput>
           </Box>
           <Box width="100%">
-            <Slider min={0} max={10000000000} focusThumbOnChange={false} value={goal} onChange={value => setGoal(value)}>
+            <Slider min={0} max={MAX} focusThumbOnChange={false} value={goal} onChange={value => setGoal(value)}>
               <SliderTrack>
                 <SliderFilledTrack />
               </SliderTrack>
@@ -68,7 +70,7 @@ function App() {
             </Slider>
           </Box>
           <Box width="100%">
-            <Button variant="outline" onClick={loadIt}>Count!</Button>
+            <Button variant="outline" onClick={loadIt}>Count to {goal.toLocaleString()}!</Button>
           </Box>
           <Box width="100%">
             {loading && <Spinner mt={4} size="xl"/>}
