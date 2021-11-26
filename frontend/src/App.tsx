@@ -28,6 +28,60 @@ type CountResult = {
 
 const MAX = 50_000_000_000;
 
+const SECOND = 1;
+const MINUTE = 60 * SECOND;
+const HOUR = MINUTE * 60;
+const DAY = HOUR * 24;
+const WEEK = DAY * 7;
+const MONTH = 30 * DAY;
+const YEAR = DAY * 365;
+
+const pluralize = (count: number, word: string) => `${word}${Math.round(count) === 1 ? '' : 's'}`;
+
+type TimePeriod = 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
+
+const INTERVALS: {[key: string]: number} = {
+  second: SECOND,
+  minute: MINUTE,
+  hour: HOUR,
+  day: DAY,
+  week: WEEK,
+  month: MONTH,
+  year: YEAR,
+};
+
+const intervals = (difference: number, word: TimePeriod): [string, number] => {
+  const numIntervals = difference / INTERVALS[word];
+  const remainder = difference % INTERVALS[word];
+  return [`${Math.round(numIntervals).toLocaleString()} ${pluralize(numIntervals, word)}`, remainder];
+};
+
+const humanCountTime = (duration: number): string => {
+  let word: (TimePeriod) = 'year';
+
+  if (duration < MINUTE) {
+    word = 'second';
+  } else if (duration < HOUR) {
+    word = 'minute';
+  } else if (duration < DAY) {
+    word = 'hour';
+  } else if (duration < WEEK) {
+    word = 'day';
+  } else if (duration < WEEK * 10) {
+    word = 'week';
+  } else if (duration < YEAR) {
+    word = 'month';
+  }
+
+  const [str, remainder] = intervals(duration, word);
+
+  if (remainder === 0) {
+    return str;
+  }
+
+  return [str, humanCountTime(remainder)].join(' ');
+}
+
 function App() {
   const [goal, setGoal] = React.useState(1_000_000_000);
   const [loading, setLoading] = React.useState(false);
@@ -53,7 +107,7 @@ function App() {
         <VStack minWidth="350px">
           <h1>Nikolai's Counter</h1>
           <Box width="100%">
-            <NumberInput max={MAX} colorScheme="white" type="number" value={goal} onChange={(value) => setGoal(parseInt(value))}>
+            <NumberInput min={0} max={MAX} colorScheme="white" type="number" value={goal} onChange={(value) => setGoal(parseInt(value || '0'))}>
               <NumberInputField />
               <NumberInputStepper>
                 <NumberIncrementStepper />
@@ -98,6 +152,9 @@ function App() {
               </Box>
             )
           }
+          <Box maxWidth="600px">
+            It would take a human <strong>{humanCountTime(goal || 0)}</strong> to count that high!
+          </Box>
         </VStack>
       </header>
     </div>
