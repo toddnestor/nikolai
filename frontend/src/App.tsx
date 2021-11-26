@@ -103,7 +103,7 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
+      <Box className="App-header" p={4}>
         <VStack minWidth="350px">
           <h1>Nikolai's Counter</h1>
           <Box width="100%">
@@ -153,10 +153,14 @@ function App() {
             )
           }
           <Box maxWidth="600px" pt={8}>
-            It would take a human <strong>{humanCountTime(goal || 0)}</strong> to count that high!
+            It would take a human
+            <br/>
+            <strong>{humanCountTime(goal || 0)}</strong>
+            <br/>
+            to count that high!
           </Box>
         </VStack>
-      </header>
+      </Box>
     </div>
   );
 }
