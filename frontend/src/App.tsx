@@ -147,6 +147,7 @@ function App() {
     };
 
     interval = setInterval(() => poller(), 1000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [results?.Id]);
 
   React.useEffect(() => {
@@ -157,6 +158,7 @@ function App() {
     if (results.completed) {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [results?.completed]);
 
   return (
