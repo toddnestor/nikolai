@@ -147,7 +147,7 @@ function App() {
     };
 
     interval = setInterval(() => poller(), 1000);
-  }, [(results || {}).Id]);
+  }, [results?.Id]);
 
   React.useEffect(() => {
     if (!results) {
@@ -157,7 +157,7 @@ function App() {
     if (results.completed) {
       setLoading(false);
     }
-  }, [(results || {}).completed]);
+  }, [results?.completed]);
 
   return (
     <div className="App">
