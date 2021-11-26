@@ -50,7 +50,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <VStack minWidth="450px">
+        <VStack minWidth="350px">
           <h1>Nikolai's Counter</h1>
           <Box width="100%">
             <NumberInput max={MAX} colorScheme="white" type="number" value={goal} onChange={(value) => setGoal(parseInt(value))}>
