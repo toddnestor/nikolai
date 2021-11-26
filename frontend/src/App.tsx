@@ -8,6 +8,7 @@ import {
   NumberIncrementStepper,
   VStack,
   Box,
+  Spinner,
   Stat,
   StatLabel,
   StatHelpText,
@@ -70,7 +71,7 @@ function App() {
             <Button variant="outline" onClick={loadIt}>Count!</Button>
           </Box>
           <Box width="100%">
-            {loading && 'Loading...'}
+            {loading && <Spinner size="xl"/>}
           </Box>
           {
             !loading && results && (
