@@ -109,6 +109,7 @@ function EstimatedTimeRemaining(props: { goal: number, start: number }) {
     }, 1000);
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <Box>
