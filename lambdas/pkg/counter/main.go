@@ -8,6 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 	"os"
+	"regexp"
+	"time"
 )
 
 const tableName = "Counters"
@@ -77,4 +79,34 @@ func (record *Record) FetchValues() {
 	if err != nil {
 		panic(fmt.Sprintf("uh oh again: %s", err))
 	}
+}
+
+func (record *Record) Count() {
+	count := 0
+
+	fmt.Printf("We are starting to count to %d...\n", record.Goal)
+
+	start := time.Now()
+
+	for count < record.Goal {
+		count = count + 1
+	}
+
+	fmt.Printf("We counted to: %d \n", count)
+
+	duration := time.Since(start)
+
+	str := fmt.Sprintf(
+		"It took us: %s\n",
+		duration,
+	)
+
+	regex := regexp.MustCompile(`\.\d+`)
+
+	str = regex.ReplaceAllString(str, "")
+
+	fmt.Println(str)
+
+	record.Duration = str
+	record.Completed = true
 }

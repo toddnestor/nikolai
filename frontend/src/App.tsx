@@ -44,10 +44,14 @@ type TimePeriod = 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'yea
 
 const TIME_PER_BILLION = 327;
 
-const estimatedTimeRemaining = (goal: number, start: number) => {
-  const elapsed = Date.now() - start;
+const estimatedTime = (goal: number): number => {
   const billions = goal / 1_000_000_000;
-  const estimate = billions * TIME_PER_BILLION;
+  return billions * TIME_PER_BILLION;
+}
+
+const estimatedTimeRemaining = (goal: number, start: number): number => {
+  const elapsed = Date.now() - start;
+  const estimate = estimatedTime(goal);
 
   return Math.floor((estimate - elapsed) / 1000);
 }
@@ -105,7 +109,10 @@ function App() {
     setLoading(true);
     setError(false);
     try {
-      const response = await fetch('https://api.nestopia.life/v1/start-count', {
+      const estimate = estimatedTime(goal);
+      const path = estimate <= 2_000 ? 'count' : 'start-count';
+
+      const response = await fetch(`https://api.nestopia.life/v1/${path}`, {
         method: 'post',
         headers: {
           'Content-Type': 'application/json',
@@ -113,8 +120,10 @@ function App() {
         body: JSON.stringify({goal})
       });
       if (response.ok) {
+        const json = await response.json() as CountResult;
         setStart(Date.now());
-        setResults(await response.json());
+        setResults(json);
+        setLoading(!json.completed);
       } else {
         setError(true);
       }
@@ -124,7 +133,7 @@ function App() {
   };
 
   React.useEffect(() => {
-    if (!results) {
+    if (!results || results.completed) {
       return;
     }
 
@@ -137,6 +146,7 @@ function App() {
         const json: CountResult = await response.json();
 
         setResults(json);
+        setLoading(!json.completed);
 
         if (json.completed && interval) {
           clearInterval(interval);
@@ -149,17 +159,6 @@ function App() {
     interval = setInterval(() => poller(), 1000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [results?.Id]);
-
-  React.useEffect(() => {
-    if (!results) {
-      return;
-    }
-
-    if (results.completed) {
-      setLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [results?.completed]);
 
   return (
     <div className="App">
