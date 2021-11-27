@@ -8,7 +8,7 @@ To demonstrate, we built a small program together that was a simple loop in Go:
 func main() {
 	count := 0
 
-	goal := 1
+	goal := 1_000_000_000_000
 
 	start := time.Now()
 
