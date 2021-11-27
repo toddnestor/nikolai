@@ -46,3 +46,4 @@ The site can be found at https://nikolai.nestopia.life
 
 Here is the Architecture diagram:
 
+![Nikolai's Counter drawio (1)](https://user-images.githubusercontent.com/6495028/143719016-2f4508f1-2385-4208-b5b5-88e123db883b.png)
