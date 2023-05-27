@@ -31,6 +31,7 @@ type CountResult = {
 }
 
 const MAX = 2_000_000_000_000;
+const ESTIMATE_MAX = 1_000_000_000_000_000_000_000;
 
 const SECOND = 1;
 const MINUTE = 60 * SECOND;
@@ -121,12 +122,15 @@ function EstimatedTimeRemaining(props: { goal: number, start: number }) {
 }
 
 function App() {
+  const [allowCounting, setAllowCounting] = React.useState(true);
   const [history, setHistory] = React.useState<CountResult[]>([]);
   const [start, setStart] = React.useState<number | null>(null);
   const [goal, setGoal] = React.useState(1_000_000_000);
   const [loading, setLoading] = React.useState(false);
   const [results, setResults] = React.useState<CountResult | null>(null);
   const [error, setError] = React.useState(false);
+
+  const max = allowCounting ? MAX : ESTIMATE_MAX;
 
   const loadIt = async () => {
     setLoading(true);
@@ -199,9 +203,9 @@ function App() {
     <div className="App">
       <Box className="App-header" p={4}>
         <VStack minWidth="350px">
-          <h1>Nikolai's Counter</h1>
+          <h1>Nikolai's Counter <Button size="xs" variant="outline" onClick={() => setAllowCounting(!allowCounting)}>{allowCounting ? 'Estimate Only' : 'Allow Counting'}</Button></h1>
           <Box width="100%">
-            <NumberInput isDisabled={loading} min={0} max={MAX} colorScheme="white" type="number" value={goal} onChange={(value) => setGoal(parseInt(value || '0'))}>
+            <NumberInput isDisabled={loading} min={0} max={max} colorScheme="white" type="number" value={goal} onChange={(value) => setGoal(parseInt(value || '0'))}>
               <NumberInputField />
               <NumberInputStepper>
                 <NumberIncrementStepper />
@@ -225,21 +229,25 @@ function App() {
             )
           }
           <Box width="100%">
-            <Slider isDisabled={loading} min={0} max={MAX} focusThumbOnChange={false} value={goal} onChange={value => setGoal(value)}>
+            <Slider isDisabled={loading} min={0} max={max} focusThumbOnChange={false} value={goal} onChange={value => setGoal(value)}>
               <SliderTrack>
                 <SliderFilledTrack />
               </SliderTrack>
               <SliderThumb fontSize="sm" boxSize="32px" />
             </Slider>
           </Box>
-          <Box width="100%">
-            <Button disabled={loading} variant="outline" onClick={loadIt}>Count to {goal.toLocaleString()}!</Button>
-          </Box>
+          {
+            allowCounting && (
+              <Box width="100%">
+                <Button disabled={loading} variant="outline" onClick={loadIt}>Count to {goal.toLocaleString()}!</Button>
+              </Box>
+            )
+          }
           <Box width="100%">
             {loading && <Spinner mt={4} size="xl"/>}
           </Box>
           {
-            !loading && results && (
+            allowCounting && !loading && results && (
               <Box width="100%">
                 <StatGroup>
                   <Stat>
@@ -255,6 +263,29 @@ function App() {
                     <StatNumber>{results.duration}</StatNumber>
                     <StatHelpText>
                       How long it took
+                    </StatHelpText>
+                  </Stat>
+                </StatGroup>
+              </Box>
+            )
+          }
+          {
+            !allowCounting && (
+              <Box width="100%">
+                <StatGroup>
+                  <Stat>
+                    <StatLabel>Goal</StatLabel>
+                    <StatNumber>{goal.toLocaleString()}</StatNumber>
+                    <StatHelpText>
+                      What we want to count to
+                    </StatHelpText>
+                  </Stat>
+
+                  <Stat>
+                    <StatLabel>Computer</StatLabel>
+                    <StatNumber>{humanCountTime(estimatedTime(goal) / 1000)}</StatNumber>
+                    <StatHelpText>
+                      Approximate time a computer would take
                     </StatHelpText>
                   </Stat>
                 </StatGroup>
